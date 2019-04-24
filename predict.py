@@ -8,7 +8,7 @@ from torch.autograd import Variable
 from torch.nn import functional as F
 from torchvision.utils import save_image
 
-from net import Generator
+from nets.generator import Generator
 
 
 def test():

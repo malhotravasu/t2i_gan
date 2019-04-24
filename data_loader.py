@@ -40,14 +40,13 @@ class Text2ImageDataset(Dataset):
         
         if image.shape != (64, 64, 3):
             image = resize(image, (64, 64, 3), anti_aliasing = True)
-
+        image = np.transpose(image, (2, 0, 1))
         return np.divide(np.array(image, dtype='float64'), 255.)
 
     def get_false_img(self, index):
         false_img_id = np.random.randint(len(self.img_files))
         if false_img_id != index:
             return self.img_files[false_img_id]
-
         return self.get_false_img(index)
 
     def __len__(self):

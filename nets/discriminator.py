@@ -9,7 +9,7 @@ class Discriminator(nn.Module):
 
         self.batch_size = batch_size
         self.img_size = img_size
-        self.in_channels = img_size[2]
+        self.in_channels = 3
         self.text_embed_dim = text_embed_dim
 
         # Defining the discriminator network architecture
@@ -43,19 +43,19 @@ class Discriminator(nn.Module):
 
         self.linear = nn.Linear(2 * 2 * 256, 1)
 
-    def forward(self, image, text_embed):
+    def forward(self, img_batch, text_embed):
+        
+        d_net_out = self.d_net(img_batch)  # (bs, 512, 4, 4)
+        
+        text_embed = text_embed.permute(0, 2, 1)
+        text_embed = text_embed.unsqueeze(3)
+        text_embed = text_embed.expand(1, 128, 4, 4)
+        
+        concat_out = torch.cat((d_net_out, text_embed), 1)  # (bs, 512+128, 4, 4)
 
-        d_net_out = self.d_net(image)  # (batch_size, 4, 4, 512)
-        text_embed.unsqueeze_(1)
-        text_embed.unsqueeze_(2)
-        text_embed = text_embed.expand(-1, 4, 4, -1)
-
-        concat_out = torch.cat((d_net_out, text_embed), 3)  # (batch_size, 4, 4, 512+text_reduced_dim)
-
-        logit = self.cat_net(concat_out)
-        concat_out = torch.view(-1, concat_out.size()[1] * concat_out.size()[2] * concat_out.size()[3])
+        concat_out = self.cat_net(concat_out)
+        concat_out = concat_out.view(1, -1)
         concat_out = self.linear(concat_out)
+        output = torch.sigmoid(concat_out)
 
-        output = F.sigmoid(logit)
-
-        return output, logit
+        return output

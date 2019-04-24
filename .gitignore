@@ -1,3 +1,4 @@
 .vscode
 flowers/
 embed_pca.pkl
+__pycache__/
